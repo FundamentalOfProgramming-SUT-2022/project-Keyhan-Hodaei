@@ -1,13 +1,18 @@
+#ifdef __linux__ 
+#include <curses.h>
+#include <dirent.h>
+#elif _WIN32
 #include <conio.h>
+#include <dir.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <dir.h>
-#include <process.h>
+#include <string.h>
 
-int find_char(char str[], char c)
+inline int find_char(char str[], char c)
 {
     for (int i = 0; i < strlen(str); i++)
         if (str[i] == c)
@@ -15,7 +20,7 @@ int find_char(char str[], char c)
     return -1;
 }
 
-int find_last_char(char str[], char c)
+inline int find_last_char(char str[], char c)
 {
     int index = -1;
     for (int i = 0; i < strlen(str); i++)
@@ -25,7 +30,7 @@ int find_last_char(char str[], char c)
 }
 
 
-int count_char(char str[], char c)
+inline int count_char(char str[], char c)
 {
     int cc = 0;
     for (int i = 0; i < strlen(str); i++)
@@ -35,14 +40,14 @@ int count_char(char str[], char c)
 }
 
 
-void free_string_vector(char** vec, int size)
+inline void free_string_vector(char** vec, int size)
 {
     for (int i = 0; i < size; i++)
         free(vec[i]);
     free(vec);
 }
 
-void create_file(char path[])
+inline void create_file(char path[])
 {
     if (find_char(path, '/') == -1) 
     {
@@ -67,7 +72,7 @@ void create_file(char path[])
     }
 }
 
-void insert(char path[], char str[], int line_number, int pos)
+inline void insert(char path[], char str[], int line_number, int pos)
 {
     FILE* fp = fopen(path, "rw");
     for (int i = 1; i < line_number; i++)
@@ -83,14 +88,14 @@ void insert(char path[], char str[], int line_number, int pos)
             break;
     }
     for (int i = 0; i < strlen(str); i++)
-        fputc(fp, str[i]);
+        fputc(str[i], fp);
     fclose(fp);
 
 }
 
-void cat(char path[])
+inline void cat(char path[])
 {
-    FILE* fp = fopen(path);
+    FILE* fp = fopen(path, "r");
     char c;
     while ((c = fgetc(fp)) != EOF)
     {
@@ -99,7 +104,7 @@ void cat(char path[])
     fclose(fp);
 }
 
-void remove(char path[], int line_number, int pos, int size, int backward)
+inline void _remove(char path[], int line_number, int pos, int size, int backward)
 {
     FILE* fp = fopen(path, "rw");
     for (int i = 1; i < line_number; i++)
@@ -117,13 +122,13 @@ void remove(char path[], int line_number, int pos, int size, int backward)
     if (backward)
         fseek(fp, -size, SEEK_CUR);
     for (int i = 0; i < size; i++)
-        fputc(fp, '\b');
+        fputc('\b', fp);
     fclose(fp);
 
 
 }
 
-void copy(char path[], int line_number, int pos, int size, int backward)
+inline void copy(char path[], int line_number, int pos, int size, int backward)
 {
     FILE* fp = fopen(path, "rw");
     for (int i = 1; i < line_number; i++)
@@ -144,20 +149,20 @@ void copy(char path[], int line_number, int pos, int size, int backward)
     for (int i = 0; i < size; i++)
     {
         char c = fgetc(fp);
-        fputc(clip, c);
+        fputc(c, clip);
 
     }
     fclose(fp);
     fclose(clip);
 }
 
-void cut(char path[], int line_number, int pos, int size, int backward)
+inline void cut(char path[], int line_number, int pos, int size, int backward)
 {
     copy(path, line_number, pos, size, backward);
-    remove(path, line_number, pos, size, backward);
+    _remove(path, line_number, pos, size, backward);
 }
 
-void paste(char path[], int line_number, int pos)
+inline void paste(char path[], int line_number, int pos)
 {
     FILE* fp = fopen(path, "rw");
     for (int i = 1; i < line_number; i++)
@@ -173,26 +178,20 @@ void paste(char path[], int line_number, int pos)
             break;
     }
     FILE* clip = fopen("clipboard.txt", "w");
-    for (int i = 0; i < size; i++)
+    char c = fgetc(clip);
+    for (int i = 0; c != EOF; i++)
     {
-        char c = fgetc(clip);
-        fputc(fp, c);
-
+        fputc(c, fp);
+        c = fgetc(clip);
     }
     fclose(fp);
     fclose(clip);
 }
 
-int main() {
-    while (true)
-    {
-        char command[100];
-        char fileAddress[100];
-        scanf("%s", command);
-        if (strcmp(command, "createfile") == 0) {
-            scanf("%s", fileAddress);
-            create_file(fileAddress);
-        }
-        // And so the other functions will be called and appropriate error handling will be done in phase 2
-    }
+
+
+inline void handle_command() {
+    char command_line[200];
+    gets(command_line);
+
 }
