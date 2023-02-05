@@ -2,8 +2,8 @@
 #include <curses.h>
 #include <dirent.h>
 #elif _WIN32
-#include <conio.h>
 #include <dir.h>
+#include <conio.h>
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -67,7 +67,7 @@ inline void create_file(char path[])
         for (; i < strlen(path); i++)
             filename[i - index - 1] = path[i];
         filename[i] = '\0';
-        mkdir(directory, 0777);
+        mkdir(directory);
         create_file(filename);
     }
 }
@@ -93,7 +93,7 @@ inline void insert(char path[], char str[], int line_number, int pos)
 
 }
 
-inline void cat(char path[])
+void cat(char path[])
 {
     FILE* fp = fopen(path, "r");
     char c;
