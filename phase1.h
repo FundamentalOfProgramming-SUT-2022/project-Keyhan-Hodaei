@@ -188,10 +188,80 @@ inline void paste(char path[], int line_number, int pos)
     fclose(clip);
 }
 
+inline int find(char path[], char str[], int start_index)
+{
+    char chunk[strlen(str)];
+    FILE* fp = fopen(path, "r");
+    fseek(fp, 0L, SEEK_END);
+    int sz = ftell(fp);
+    fseek(fp, 0L, SEEK_SET);
+    for (int i = start_index; i < sz - strlen(str); i++) {
+        fseek(fp, i, SEEK_SET);
+        fread(chunk, 1, strlen(str), fp);
+        if (strcmp(chunk, str) == 0)
+            return i;
+    }
+    return -1;
+}
 
+inline int find_count(char path[], char str[])
+{
+    int cnt = -1;
+    int result = 0;
+    while (result != -1)
+    {
+        result = find(path, str, result);
+        cnt ++;
+        if (result != -1)
+            result ++;
+    }
+    return cnt;
+}
+
+inline int find_at(char path[], char str[], int n)
+{
+    int cnt = -1;
+    int result = 0;
+    for (int i = 0; i < n && result != -1; i++) {
+        result = find(path, str, result);
+        if (result != -1)
+            result ++;
+    }
+    return result;
+}
+
+
+inline void find_all(char path[], char str[], int n)
+{
+    int result = 0;
+    while (result != -1)
+    {
+
+        result = find(path, str, result);
+        if (result != -1)
+        printf("%d,", result);
+    }
+}
+
+inline void replace(char path[], char str[], char str2[])
+{
+    char chunk[strlen(str)];
+    FILE* fp = fopen(path, "rw");
+    fseek(fp, 0L, SEEK_END);
+    int sz = ftell(fp);
+    fseek(fp, 0L, SEEK_SET);
+    for (int i = 0; i < sz - strlen(str); i++) {
+        fseek(fp, i, SEEK_SET);
+        fread(chunk, 1, strlen(str), fp);
+        if (strcmp(chunk, str) == 0) {
+            fprintf(fp, "%s", str2);
+        }
+    }
+}
 
 inline void handle_command() {
     char command_line[200];
     gets(command_line);
 
 }
+
